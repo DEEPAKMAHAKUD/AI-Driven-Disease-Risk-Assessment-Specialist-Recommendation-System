@@ -188,6 +188,27 @@ def get_specialists():
         } for s in specialists]
     })
 
+@app.route('/api/dashboard/stats', methods=['GET'])
+def get_dashboard_stats():
+    total_patients = Patient.query.count()
+    total_assessments = Assessment.query.count()
+    total_specialists = Specialist.query.count()
+    
+    # Get recent assessments
+    recent_assessments = Assessment.query.order_by(Assessment.created_at.desc()).limit(5).all()
+    
+    return jsonify({
+        "total_patients": total_patients,
+        "total_assessments": total_assessments,
+        "total_specialists": total_specialists,
+        "recent_assessments": [{
+            "id": a.id,
+            "patient_id": a.patient_id,
+            "created_at": a.created_at.isoformat(),
+            "symptoms": a.symptoms
+        } for a in recent_assessments]
+    })
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()

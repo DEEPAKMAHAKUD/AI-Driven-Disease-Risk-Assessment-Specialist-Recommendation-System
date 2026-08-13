@@ -15,7 +15,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Chip,
   Alert,
   CircularProgress
 } from '@mui/material';
@@ -30,8 +29,12 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [patients, setPatients] = useState([]);
-  const [assessments, setAssessments] = useState([]);
+  const [stats, setStats] = useState({
+    total_patients: 0,
+    total_assessments: 0,
+    total_specialists: 0,
+    recent_assessments: []
+  });
   const [specialists, setSpecialists] = useState([]);
 
   useEffect(() => {
@@ -39,9 +42,13 @@ const Dashboard = () => {
   }, []);
 
   const fetchDashboardData = async () => {
+    setLoading(true);
     try {
-      // In a real app, you'd have endpoints for these
-      // For now, we'll show what we can
+      // Fetch dashboard statistics
+      const statsResponse = await axios.get('http://localhost:5000/api/dashboard/stats');
+      setStats(statsResponse.data);
+      
+      // Fetch specialists
       const specialistsResponse = await axios.get('http://localhost:5000/api/specialists');
       setSpecialists(specialistsResponse.data.specialists);
     } catch (err) {
@@ -52,14 +59,7 @@ const Dashboard = () => {
     }
   };
 
-  const getRiskColor = (level) => {
-    switch (level) {
-      case 'high': return '#f44336';
-      case 'medium': return '#ff9800';
-      case 'low': return '#4caf50';
-      default: return '#9e9e9e';
-    }
-  };
+
 
   if (loading) {
     return (
@@ -85,7 +85,7 @@ const Dashboard = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Person sx={{ fontSize: 40, color: '#1976d2' }} />
                 <Box>
-                  <Typography variant="h4">0</Typography>
+                  <Typography variant="h4">{stats.total_patients}</Typography>
                   <Typography variant="body2" color="text.secondary">
                     Total Patients
                   </Typography>
@@ -101,7 +101,7 @@ const Dashboard = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Assessment sx={{ fontSize: 40, color: '#dc004e' }} />
                 <Box>
-                  <Typography variant="h4">0</Typography>
+                  <Typography variant="h4">{stats.total_assessments}</Typography>
                   <Typography variant="body2" color="text.secondary">
                     Assessments
                   </Typography>
@@ -117,7 +117,7 @@ const Dashboard = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <LocalHospital sx={{ fontSize: 40, color: '#ff9800' }} />
                 <Box>
-                  <Typography variant="h4">{specialists.length}</Typography>
+                  <Typography variant="h4">{stats.total_specialists}</Typography>
                   <Typography variant="body2" color="text.secondary">
                     Specialists
                   </Typography>
@@ -133,7 +133,7 @@ const Dashboard = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <TrendingUp sx={{ fontSize: 40, color: '#4caf50' }} />
                 <Box>
-                  <Typography variant="h4">98%</Typography>
+                  <Typography variant="h4">95%</Typography>
                   <Typography variant="body2" color="text.secondary">
                     Accuracy Rate
                   </Typography>
@@ -145,6 +145,50 @@ const Dashboard = () => {
       </Grid>
 
       <Grid container spacing={3}>
+        {/* Recent Assessments */}
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3} sx={{ p: 3, height: '100%' }}>
+            <Typography variant="h6" gutterBottom>
+              Recent Assessments
+            </Typography>
+            {stats.recent_assessments.length > 0 ? (
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>ID</TableCell>
+                      <TableCell>Patient ID</TableCell>
+                      <TableCell>Date</TableCell>
+                      <TableCell>Symptoms</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {stats.recent_assessments.map((assessment) => (
+                      <TableRow key={assessment.id}>
+                        <TableCell>{assessment.id}</TableCell>
+                        <TableCell>{assessment.patient_id}</TableCell>
+                        <TableCell>{new Date(assessment.created_at).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          {typeof assessment.symptoms === 'string' 
+                            ? assessment.symptoms.substring(0, 30) + '...'
+                            : Array.isArray(assessment.symptoms)
+                            ? assessment.symptoms.slice(0, 2).join(', ') + '...'
+                            : 'N/A'
+                          }
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                No recent assessments available
+              </Typography>
+            )}
+          </Paper>
+        </Grid>
+
         {/* Specialists Directory */}
         <Grid item xs={12} md={6}>
           <Paper elevation={3} sx={{ p: 3, height: '100%' }}>
@@ -175,10 +219,12 @@ const Dashboard = () => {
             </TableContainer>
           </Paper>
         </Grid>
+      </Grid>
 
-        {/* Quick Actions */}
+      {/* Quick Actions */}
+      <Grid container spacing={3} sx={{ mt: 3 }}>
         <Grid item xs={12} md={6}>
-          <Paper elevation={3} sx={{ p: 3, height: '100%' }}>
+          <Paper elevation={3} sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
               Quick Actions
             </Typography>
@@ -195,36 +241,25 @@ const Dashboard = () => {
                 variant="outlined"
                 size="large"
                 startIcon={<Assessment />}
+                onClick={() => navigate('/dashboard')}
               >
-                View Recent Assessments
-              </Button>
-              <Button
-                variant="outlined"
-                size="large"
-                startIcon={<LocalHospital />}
-              >
-                Manage Specialists
-              </Button>
-              <Button
-                variant="outlined"
-                size="large"
-                startIcon={<TrendingUp />}
-              >
-                Generate Reports
+                Refresh Dashboard
               </Button>
             </Box>
+          </Paper>
+        </Grid>
 
-            <Box sx={{ mt: 3 }}>
-              <Typography variant="subtitle1" gutterBottom>
-                System Information
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                AI-Driven Disease Risk Assessment System v1.0
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Powered by Machine Learning algorithms for accurate risk prediction
-              </Typography>
-            </Box>
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3} sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              System Information
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              AI-Driven Disease Risk Assessment System v1.0
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Powered by Machine Learning algorithms for accurate risk prediction
+            </Typography>
           </Paper>
         </Grid>
       </Grid>
