@@ -142,69 +142,74 @@ const Results = () => {
               Based on your symptoms, these are the conditions with the highest probability:
             </Typography>
             <List>
-              {Object.entries(results.risk_results?.disease_risks || {})
-                .filter(([_, risk]) => risk.level === 'high' || risk.level === 'medium')
-                .sort(([_, a], [__, b]) => b.score - a.score)
-                .slice(0, 3)
-                .map(([disease, risk]) => (
-                <React.Fragment key={disease}>
-                  <ListItem>
-                    <ListItemText
-                      primary={
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <Typography variant="subtitle1" sx={{ textTransform: 'capitalize', fontWeight: 'bold' }}>
-                            {disease}
-                          </Typography>
-                          <Chip
-                            label={`${Math.round(risk.score)}% CHANCE`}
-                            sx={{
-                              backgroundColor: getRiskColor(risk.level),
-                              color: 'white',
-                              fontWeight: 'bold',
-                              fontSize: '1rem'
-                            }}
-                          />
-                        </Box>
-                      }
-                      secondary={
-                        <Box sx={{ mt: 1 }}>
-                          <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                            Risk Level: {risk.level.toUpperCase()}
-                          </Typography>
-                          <LinearProgress
-                            variant="determinate"
-                            value={risk.score}
-                            sx={{
-                              mt: 1,
-                              height: 8,
-                              borderRadius: 4,
-                              backgroundColor: '#e0e0e0',
-                              '& .MuiLinearProgress-bar': {
-                                backgroundColor: getRiskColor(risk.level)
-                              }
-                            }}
-                          />
-                          {risk.key_factors && risk.key_factors.length > 0 && (
-                            <Box sx={{ mt: 2 }}>
-                              <Typography variant="subtitle2" fontWeight="bold" color="text.primary">
-                                Reasons for this risk:
-                              </Typography>
-                              <Box sx={{ mt: 1 }}>
-                                {risk.key_factors.map((factor, idx) => (
-                                  <Typography key={idx} variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-                                    • {factor}
-                                  </Typography>
-                                ))}
+              {Object.entries(results.risk_results?.disease_risks || {}).length > 0 ? (
+                Object.entries(results.risk_results?.disease_risks || {})
+                  .sort(([_, a], [__, b]) => b.score - a.score)
+                  .slice(0, 3)
+                  .map(([disease, risk]) => (
+                  <React.Fragment key={disease}>
+                    <ListItem>
+                      <ListItemText
+                        primary={
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography variant="subtitle1" sx={{ textTransform: 'capitalize', fontWeight: 'bold' }}>
+                              {disease}
+                            </Typography>
+                            <Chip
+                              label={`${Math.round(risk.score)}% CHANCE`}
+                              sx={{
+                                backgroundColor: getRiskColor(risk.level),
+                                color: 'white',
+                                fontWeight: 'bold',
+                                fontSize: '1rem'
+                              }}
+                            />
+                          </Box>
+                        }
+                        secondary={
+                          <Box sx={{ mt: 1 }}>
+                            <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                              Risk Level: {risk.level.toUpperCase()}
+                            </Typography>
+                            <LinearProgress
+                              variant="determinate"
+                              value={risk.score}
+                              sx={{
+                                mt: 1,
+                                height: 8,
+                                borderRadius: 4,
+                                backgroundColor: '#e0e0e0',
+                                '& .MuiLinearProgress-bar': {
+                                  backgroundColor: getRiskColor(risk.level)
+                                }
+                              }}
+                            />
+                            {risk.key_factors && risk.key_factors.length > 0 && (
+                              <Box sx={{ mt: 2 }}>
+                                <Typography variant="subtitle2" fontWeight="bold" color="text.primary">
+                                  Reasons for this risk:
+                                </Typography>
+                                <Box sx={{ mt: 1 }}>
+                                  {risk.key_factors.map((factor, idx) => (
+                                    <Typography key={idx} variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                                      • {factor}
+                                    </Typography>
+                                  ))}
+                                </Box>
                               </Box>
-                            </Box>
-                          )}
-                        </Box>
-                      }
-                    />
-                  </ListItem>
-                  <Divider />
-                </React.Fragment>
-              ))}
+                            )}
+                          </Box>
+                        }
+                      />
+                    </ListItem>
+                    <Divider />
+                  </React.Fragment>
+                ))
+              ) : (
+                <ListItem>
+                  <ListItemText primary="No significant disease risks detected based on your symptoms." />
+                </ListItem>
+              )}
             </List>
           </Paper>
         </Grid>
