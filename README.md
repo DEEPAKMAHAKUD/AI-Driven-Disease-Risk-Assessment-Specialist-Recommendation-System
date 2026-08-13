@@ -7,7 +7,7 @@ A comprehensive healthcare application that uses artificial intelligence to asse
 ### Core Functionality
 - **Patient Registration**: Collect and manage patient demographic information
 - **Health Assessment**: Comprehensive symptom and medical data collection
-- **AI-Powered Risk Analysis**: Machine learning-based disease risk scoring for 6 major disease categories
+- **AI-Powered Risk Analysis**: Machine learning-based disease risk scoring for 8 major disease categories
 - **Specialist Recommendations**: Intelligent matching with appropriate medical specialists
 - **Interactive Dashboard**: Real-time monitoring and analytics
 - **Data Visualization**: Visual representation of risk scores and trends
@@ -151,7 +151,7 @@ The frontend will run on `http://localhost:3000`
 
 The system uses a multi-factor risk assessment approach:
 
-1. **Symptom Matching** (40% weight): Compares patient symptoms against disease patterns
+1. **Symptom Matching** (60% weight): Compares patient symptoms against disease patterns with pattern recognition
 2. **Risk Factor Analysis** (30% weight): Evaluates medical history, family history, and lifestyle
 3. **Age-Based Risk** (20% weight): Considers age-related risk patterns
 4. **Lab Results** (10% weight): Integrates laboratory data when available
@@ -164,8 +164,8 @@ The system uses a multi-factor risk assessment approach:
 ## Specialist Recommendation Logic
 
 Specialists are recommended based on:
-1. Primary specialty for high-risk diseases
-2. Secondary specialties for comprehensive care
+1. Primary specialty for highest-risk disease
+2. Clear explanation of why specialist is needed
 3. Geographic location
 4. Priority level (urgent/routine/lifestyle)
 5. Specialist ratings and availability
@@ -235,7 +235,7 @@ Adjust the weight coefficients in the `assess_risk` method in `risk_assessment.p
 
 ## License
 
-This project is for educational and demonstration purposes.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Support
 
